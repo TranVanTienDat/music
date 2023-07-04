@@ -1,114 +1,138 @@
-const $ = document.querySelector.bind(document)
-const $$ = document.querySelectorAll.bind(document)
-
-const song = $("#song");
-const playBtn = $(".player-inner");
-const nextBtn = $(".play-forward");
-const prevBtn = $(".play-back");
-const durationTime = $(".duration");
-const remainingTime = $(".remaining");
-const rangeBar = $(".range");
-const musicName = $(".music-name");
-const musicThumbnail = $(".music-thumb");
-const musicImage = $(".music-thumb img");
-const playRepeat = $(".play-repeat");
+const song = document.getElementById("song");
+const playBtn = document.querySelector(".player-inner");
+const nextBtn = document.querySelector(".play-forward");
+const prevBtn = document.querySelector(".play-back");
+const durationTime = document.querySelector(".duration");
+const remainingTime = document.querySelector(".remaining");
+const rangeBar = document.querySelector(".range");
+const musicName = document.querySelector(".music-name");
+const musicThumbnail = document.querySelector(".music-thumb");
+const musicImage = document.querySelector(".music-thumb img");
+const playRepeat = document.querySelector(".play-repeat");
 
 let isPlaying = true;
 let indexSong = 0;
-let isRepeat = true;
+let isRepeat = false;
+const musics = [
+  {
+    id: 1,
+    title: "anh danh roi nguoi yeu nay",
+    file: "./assets/music/AnhSaoVaBauTroi-TRI-7085073.mp3",
+    image:
+      "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80",
+  },
+  {
+    id: 2,
+    title: "anh sao va bau troi",
+    file: "./assets/music/AnhDanhRoiNguoiYeuNayLiveCover-AndiezPay-7011166.mp3",
+    image:
+      "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80",
+  },
+  {
+    id: 3,
+    title: "bao nhieu mot mo bình yen",
+    file: "./assets/music/BaoTienMotMoBinhYen-14CasperBon-6897329.mp3",
+    image:
+      "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80",
+  },
+];
+/**
+ * Music
+ * id: 1
+ * title: Holo
+ * file: holo.mp3
+ * image: unsplash
+ */
 let timer;
 let repeatCount = 0;
-const musics =  [
-    {
-        id: 1,
-        title: "anh danh roi nguoi yeu nay",
-        file:"./assets/music/AnhSaoVaBauTroi-TRI-7085073.mp3",
-        image:
-          "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80",
-    },
-    {
-        id: 2,
-        title: "anh sao va bau troi",
-        file:"./assets/music/AnhDanhRoiNguoiYeuNayLiveCover-AndiezPay-7011166.mp3",
-        image:
-          "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80",
-    },
-    {
-        id: 3,
-        title: "bao nhieu mot mo bình yen",
-        file:"./assets/music/BaoTienMotMoBinhYen-14CasperBon-6897329.mp3",
-        image:
-          "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80",
-    },
-    {
-        id: 4,
-        title: "buoc qua mua co don",
-        file:"./assets/music/BuocQuaMuaCoDon-Vu-6879419.mp3",
-        image:
-          "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80",
-    }
-]
-song.setAttribute("src",`${musics[indexSong].file}`)
-
+playRepeat.addEventListener("click", function () {
+  if (isRepeat) {
+    isRepeat = false;
+    playRepeat.removeAttribute("style");
+  } else {
+    isRepeat = true;
+    playRepeat.style.color = "#ffb86c";
+  }
+});
 nextBtn.addEventListener("click", function () {
-    changeSong(1);
-  }); 
-  prevBtn.addEventListener("click", function () {
-    changeSong(-1);
-  });
-
-  function changeSong(dir) {
-    if(dir === 1) {
-        indexSong++
-        if(indexSong >= musics.length) {
-            indexSong = 0;
-        }
-        isPlaying = true
-    }
-    else if(dir === -1){
-        indexSong--;
-        if(indexSong < musics.length) {
-            indexSong = musics.length - 1;
-        }
-        isPlaying = true;
-    }
-    song.setAttribute("src",`${musics[indexSong].file}`);
+  changeSong(1);
+});
+prevBtn.addEventListener("click", function () {
+  changeSong(-1);
+});
+song.addEventListener("ended", handleEndedSong);
+function handleEndedSong() {
+  repeatCount++;
+  if (isRepeat && repeatCount === 1) {
+    // handle repeat song
+    isPlaying = true;
     playPause();
+  } else {
+    changeSong(1);
   }
-
-playBtn.addEventListener('click', playPause)
-function playPause() {
-    if(isPlaying) {
-        song.play()
-        musicThumbnail.classList.add('is-playing')
-        playBtn.innerHTML = `<ion-icon name="pause-circle"></ion-icon>`
-    // timer = setInterval(displayTimer, 500);
-        isPlaying = false
-    } else { 
-        song.pause() 
-        musicThumbnail.classList.remove('is-playing')
-        playBtn.innerHTML = `<ion-icon name="play"></ion-icon>`
-        // clearInterval(timer);
-        isPlaying = true
+}
+function changeSong(dir) {
+  if (dir === 1) {
+    // next song
+    indexSong++;
+    if (indexSong >= musics.length) {
+      indexSong = 0;
     }
-}
-
-playRepeat.addEventListener('click', songRepeat)
-function songRepeat() {
-  if(isRepeat) {
-  
-    
-    repeatCount = indexSong
-    this.style.color = 'red'
-    song.setAttribute("src",`${musics[repeatCount].file}`); 
-    isRepeat = false
-
+    isPlaying = true;
+  } else if (dir === -1) {
+    // prev song
+    indexSong--;
+    if (indexSong < 0) {
+      indexSong = musics.length - 1;
+    }
+    isPlaying = true;
   }
-  else {
-    this.style.color = 'black'
-    song.setAttribute("src",`${musics[indexSong].file}`);  
-    isRepeat = true
-  }
-  // console.log(isRepeat)
+  init(indexSong);
+  // song.setAttribute("src", `./music/${musics[indexSong].file}`);
+  playPause();
 }
-
+playBtn.addEventListener("click", playPause);
+function playPause() {
+  if (isPlaying) {
+    musicThumbnail.classList.add("is-playing");
+    song.play();
+    playBtn.innerHTML = `<ion-icon name="pause-circle"></ion-icon>`;
+    isPlaying = false;
+    timer = setInterval(displayTimer, 500);
+  } else {
+    musicThumbnail.classList.remove("is-playing");
+    song.pause();
+    playBtn.innerHTML = `<ion-icon name="play"></ion-icon>`;
+    isPlaying = true;
+    clearInterval(timer);
+  }
+}
+function displayTimer() {
+  const { duration, currentTime } = song;
+  rangeBar.max = duration;
+  rangeBar.value = currentTime;
+  remainingTime.textContent = formatTimer(currentTime);
+  if (!duration) {
+    durationTime.textContent = "00:00";
+  } else {
+    durationTime.textContent = formatTimer(duration);
+  }
+}
+function formatTimer(number) {
+  const minutes = Math.floor(number / 60);
+  const seconds = Math.floor(number - minutes * 60);
+  return `${minutes < 10 ? "0" + minutes : minutes}:${
+    seconds < 10 ? "0" + seconds : seconds
+  }`;
+}
+rangeBar.addEventListener("change", handleChangeBar);
+function handleChangeBar() {
+  song.currentTime = rangeBar.value;
+}
+function init(indexSong) {
+  song.setAttribute("src", `${musics[indexSong].file}`);
+  musicImage.setAttribute("src", musics[indexSong].image);
+  musicName.textContent = musics[indexSong].title;
+}
+displayTimer();
+init(indexSong);
